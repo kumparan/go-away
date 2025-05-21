@@ -187,12 +187,14 @@ func (g *ProfanityDetector) checkProfanity(s *string, originalIndexes *[]int, ce
 func (g *ProfanityDetector) removeFalsePositives(s *string, originalIndexes *[]int, runeWordLength *int) {
 	for _, word := range g.falsePositives {
 		currentIndex := 0
+		oriIndex := 0
 		*runeWordLength = len([]rune(word))
 		for currentIndex != -1 {
 			if foundIndex := strings.Index((*s)[currentIndex:], word); foundIndex != -1 {
-				foundRuneIndex := g.indexToRune(*s, foundIndex)
-				*originalIndexes = append((*originalIndexes)[:foundRuneIndex], (*originalIndexes)[foundRuneIndex+*runeWordLength:]...)
-				currentIndex += foundIndex + len([]byte(word))
+				*originalIndexes = append((*originalIndexes)[:oriIndex+foundIndex], (*originalIndexes)[oriIndex+foundIndex+*runeWordLength:]...)
+
+				oriIndex += foundIndex
+				currentIndex += foundIndex + *runeWordLength
 			} else {
 				break
 			}
@@ -282,6 +284,12 @@ func (g *ProfanityDetector) buildCharacterReplacements() *ProfanityDetector {
 		g.characterReplacements['!'] = ' '
 		g.characterReplacements['?'] = ' '
 		g.characterReplacements['+'] = ' '
+		g.characterReplacements['\\'] = ' '
+		g.characterReplacements['['] = ' '
+		g.characterReplacements[']'] = ' '
+		g.characterReplacements['{'] = ' '
+		g.characterReplacements['}'] = ' '
+		g.characterReplacements[':'] = ' '
 	}
 	if g.sanitizeLeetSpeak {
 		g.characterReplacements['4'] = 'a'
