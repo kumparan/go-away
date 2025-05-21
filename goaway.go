@@ -304,6 +304,8 @@ func (g *ProfanityDetector) buildCharacterReplacements() *ProfanityDetector {
 		g.characterReplacements['7'] = 'l'
 		g.characterReplacements['3'] = 'e'
 		g.characterReplacements['5'] = 's'
+		g.characterReplacements['6'] = 'g'
+		g.characterReplacements['9'] = 'g'
 		g.characterReplacements['<'] = 'c'
 	}
 	return g
