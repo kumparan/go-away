@@ -197,10 +197,17 @@ func (g *ProfanityDetector) removeFalsePositives(s *string, originalIndexes *[]i
 	for _, word := range g.falsePositives {
 		currentIndex := 0
 		oriIndex := 0
+		oriIndexLen := len(*originalIndexes)
+
 		*runeWordLength = len([]rune(word))
 		for currentIndex != -1 {
 			if foundIndex := strings.Index((*s)[currentIndex:], word); foundIndex != -1 {
 				foundRuneIndex := g.indexToRune(*s, foundIndex)
+
+				if oriIndex+foundRuneIndex > oriIndexLen || oriIndex+foundRuneIndex+*runeWordLength > oriIndexLen {
+					break // prevent panic
+				}
+
 				*originalIndexes = append((*originalIndexes)[:oriIndex+foundRuneIndex], (*originalIndexes)[oriIndex+foundRuneIndex+*runeWordLength:]...)
 
 				oriIndex += foundIndex
