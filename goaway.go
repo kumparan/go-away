@@ -1,6 +1,7 @@
 package goaway
 
 import (
+	"github.com/forPelevin/gomoji"
 	"strings"
 	"unicode"
 
@@ -26,6 +27,7 @@ type ProfanityDetector struct {
 	sanitizeLeetSpeak         bool // Whether to replace characters with a non-' ' value in characterReplacements
 	sanitizeAccents           bool
 	sanitizeSpaces            bool
+	sanitizeEmoticon          bool
 
 	profanities    []string
 	falseNegatives []string
@@ -41,6 +43,7 @@ func NewProfanityDetector() *ProfanityDetector {
 		sanitizeLeetSpeak:         true,
 		sanitizeAccents:           true,
 		sanitizeSpaces:            true,
+		sanitizeEmoticon:          true,
 		profanities:               DefaultProfanities,
 		falsePositives:            DefaultFalsePositives,
 		falseNegatives:            DefaultFalseNegatives,
@@ -85,6 +88,12 @@ func (g *ProfanityDetector) WithSanitizeAccents(sanitize bool) *ProfanityDetecto
 // WithSanitizeSpaces allows configuring whether the sanitization process should also take into account spaces
 func (g *ProfanityDetector) WithSanitizeSpaces(sanitize bool) *ProfanityDetector {
 	g.sanitizeSpaces = sanitize
+	return g
+}
+
+// WithSanitizeEmoticon allows configuring whether the sanitization process should also take into account emoticons
+func (g *ProfanityDetector) WithSanitizeEmoticon(sanitize bool) *ProfanityDetector {
+	g.sanitizeEmoticon = sanitize
 	return g
 }
 
@@ -195,7 +204,7 @@ func (g *ProfanityDetector) removeFalsePositives(s *string, originalIndexes *[]i
 				*originalIndexes = append((*originalIndexes)[:oriIndex+foundRuneIndex], (*originalIndexes)[oriIndex+foundRuneIndex+*runeWordLength:]...)
 
 				oriIndex += foundIndex
-				currentIndex += foundIndex + len([]byte(word))
+				currentIndex += foundIndex + *runeWordLength
 			} else {
 				break
 			}
@@ -209,6 +218,11 @@ func (g ProfanityDetector) sanitize(s string, rememberOriginalIndexes bool) (str
 	if g.sanitizeLeetSpeak && !rememberOriginalIndexes && g.sanitizeSpecialCharacters {
 		s = strings.ReplaceAll(s, "()", "o")
 	}
+
+	if g.sanitizeEmoticon {
+		s = gomoji.ReplaceEmojisWith(s, ' ') // replace to space, prevents off-by-one errors
+	}
+
 	sb := strings.Builder{}
 	for _, char := range s {
 		if replacement, found := g.characterReplacements[char]; found {
