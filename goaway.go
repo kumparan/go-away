@@ -210,6 +210,7 @@ func (g *ProfanityDetector) removeFalsePositives(s *string, originalIndexes *[]i
 
 				*originalIndexes = append((*originalIndexes)[:oriIndex+foundRuneIndex], (*originalIndexes)[oriIndex+foundRuneIndex+*runeWordLength:]...)
 
+				oriIndexLen = len(*originalIndexes)
 				oriIndex += foundIndex
 				currentIndex += foundIndex + *runeWordLength
 			} else {
